@@ -56,7 +56,7 @@ Add this to your `.vscode/mcp.json`:
 }
 ```
 
-## Running from Local Repository
+### Running from Local Repository
 
 1. Clone repository
 
@@ -161,7 +161,7 @@ const server = new MySQLMCPServer({
 
 The MySQL MCP Server provides several powerful tools for database interaction. Each tool is designed with security in mind and includes proper input validation:
 
-### `mysql_list_tables`
+### mysql_list_tables
 
 **Purpose**: Lists all accessible tables in the database
 
@@ -170,7 +170,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
 - No parameters required
 - Respects table access controls if configured
 
-### `mysql_describe_table`
+### mysql_describe_table
 
 **Purpose**: Get detailed information about a table structure including columns, types, and constraints
 
@@ -180,7 +180,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
 - **Parameters:**
   - `table_name` (string, required): Name of the table to describe
 
-### `mysql_select_data`
+### mysql_select_data
 
 **Purpose**: Select data from a table with optional filtering and pagination
 
@@ -196,7 +196,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
   - `limit` (number, optional): Maximum number of rows to return
   - `offset` (number, optional): Number of rows to skip for pagination
 
-### `mysql_insert_data` (if enabled)
+### mysql_insert_data (if enabled)
 
 **Purpose**: Insert new data into a table
 
@@ -208,7 +208,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
   - `table_name` (string, required): Name of the table to insert into
   - `data` (object, required): Data to insert as key-value pairs (e.g., {"name": "John", "age": 30})
 
-### `mysql_update_data` (if enabled)
+### mysql_update_data (if enabled)
 
 **Purpose**: Update existing data in a table
 
@@ -222,7 +222,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
   - `where` (string, required): WHERE clause to identify rows to update (e.g., "id = 123")
   - `where_params` (array, optional): Parameters for parameterized WHERE clauses
 
-### `mysql_delete_data` (if enabled)
+### mysql_delete_data (if enabled)
 
 **Purpose**: Delete data from a table
 
