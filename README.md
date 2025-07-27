@@ -2,57 +2,135 @@
 
 A secure, feature-rich MySQL Model Context Protocol (MCP) server designed for integration with AI assistants like Claude and VS Code GitHub Copilot.
 
+## Table of Contents
+
+- [Features](#features)
+- [Usage](#usage)
+  - [With Visual Studio Code](#with-visual-studio-code)
+- [Running from Local Repository](#running-from-local-repository)
+- [Use in your project](#use-in-your-project)
+- [Available Tools](#available-tools)
+- [Configuration Options](#configuration-options)
+  - [Database Configuration](#database-configuration)
+  - [Feature Configuration](#feature-configuration)
+  - [Security Configuration](#security-configuration)
+  - [Logging Configuration](#logging-configuration)
+- [Security Features](#security-features)
+- [Error Handling](#error-handling)
+- [Contributing](#contributing)
+- [Support](#support)
+
 ## Features
 
-- 🔐 **Security First**: Built with security best practices, input validation, and configurable access controls
-- 🎛️ **Configurable Operations**: Enable/disable CRUD operations based on your needs (fetch enabled by default)
-- 📊 **Tabular Data Display**: Properly formatted responses for easy data visualization
-- 📝 **Comprehensive Logging**: Detailed logging for debugging and monitoring
-- 🔧 **Environment-Based Configuration**: Easy setup using environment variables or configuration objects
-- 🚀 **NPM Package**: Ready to use as a dependency in your projects
+- **Security First**: Built with security best practices, input validation, and configurable access controls
+- **Configurable Operations**: Enable/disable CRUD operations based on your needs (fetch enabled by default)
+- **Tabular Data Display**: Properly formatted responses for easy data visualization
+- **Comprehensive Logging**: Detailed logging for debugging and monitoring
+- **Environment-Based Configuration**: Easy setup using environment variables or configuration objects
+- **NPM Package**: Ready to use as a dependency in your projects
 
-## Installation
+## Usage
+
+### With Visual Studio Code
+
+Add this to your `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["@lakshya-mcp/mysql-mcp-server-claude"],
+      "env": {
+        "MYSQL_HOST": "{your_host}",
+        "MYSQL_PORT": "{your_port}",
+        "MYSQL_USER": "{your_username}",
+        "MYSQL_PASSWORD": "{your_password}",
+        "MYSQL_DATABASE": "{your_database}",
+        "MYSQL_ALLOW_CREATE": "false",
+        "MYSQL_ALLOW_UPDATE": "false",
+        "MYSQL_ALLOW_DELETE": "false"
+      }
+    }
+  }
+}
+```
+
+## Running from Local Repository
+
+1. Clone repository
 
 ```bash
-npm install @lakshya-mcp/mysql-mcp-server-claude
+git clone git@github.com:Lakshya-Saini/mysql-mcp-server.git
+cd mysql-mcp-server
 ```
 
-## Quick Start
+2. Install dependencies
 
-### Environment Variables
-
-Create a `.env` file in your project root:
-
-```env
-# Required Database Configuration
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=your_username
-MYSQL_PASSWORD=your_password
-MYSQL_DATABASE=your_database
-
-# Optional Security Configuration
-MYSQL_SSL=false
-MYSQL_CONNECTION_LIMIT=10
-MYSQL_TIMEOUT=60000
-
-# Feature Toggles (fetch is always enabled)
-MYSQL_ALLOW_CREATE=false
-MYSQL_ALLOW_UPDATE=false
-MYSQL_ALLOW_DELETE=false
-
-# Security Settings
-MYSQL_ALLOWED_TABLES=table1,table2,table3
-MYSQL_BLOCKED_TABLES=sensitive_table,admin_table
-MYSQL_MAX_ROWS=1000
-MYSQL_READ_ONLY=true
-
-# Logging Configuration
-LOG_LEVEL=info
-LOG_FILE=./mysql-mcp.log
+```bash
+npm install
 ```
 
-### Basic Usage
+3. Copy `.env.example` to `.env`:
+
+```bash
+mv .env.example .env
+```
+
+4. Build project
+
+```bash
+npm run build
+```
+
+5. Configure Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "mcp_server_mysql": {
+      "command": "/path/to/node",
+      "args": ["/full/path/to/mcp-server-mysql/dist/index.js"],
+      "env": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASS": "your_password",
+        "MYSQL_DB": "your_database",
+        "ALLOW_INSERT_OPERATION": "false",
+        "ALLOW_UPDATE_OPERATION": "false",
+        "ALLOW_DELETE_OPERATION": "false",
+        "PATH": "/Users/atlasborla/Library/Application Support/Herd/config/nvm/versions/node/v22.9.0/bin:/usr/bin:/bin", // <--- Important to add the following, run in your terminal `echo "$(which node)/../"` to get the path
+        "NODE_PATH": "/Users/atlasborla/Library/Application Support/Herd/config/nvm/versions/node/v22.9.0/lib/node_modules" // <--- Important to add the following, run in your terminal `echo "$(which node)/../../lib/node_modules"`
+      }
+    }
+  }
+}
+```
+
+Replace:
+
+- /path/to/node with the full path to your Node.js binary (find it with which node)
+- /full/path/to/mcp-server-mysql with the full path to where you cloned the repository
+- Set the MySQL credentials to match your environment
+
+6. Test server
+
+```bash
+node dist/index.js
+```
+
+If it connects to MySQL successfully, you're ready to use it with Claude Desktop.
+
+### Use in your project
+
+1. Install package
+
+```bash
+npm install -g @lakshya-mcp/mysql-mcp-server-claude
+```
+
+2. Create server and use
 
 ```javascript
 const { MySQLMCPServer } = require("@lakshya-mcp/mysql-mcp-server-claude");
@@ -79,104 +157,85 @@ const server = new MySQLMCPServer({
 });
 ```
 
-## VS Code Integration
-
-### 1. Install the Extension
-
-Install the "Claude Code" extension in VS Code.
-
-### 2. Configure MCP Server
-
-Add the MySQL MCP server to your VS Code settings. Open your VS Code settings (JSON) and add:
-
-```json
-{
-  "claude.mcpServers": {
-    "mysql": {
-      "command": "npx",
-      "args": ["@lakshya-mcp/mysql-mcp-server-claude"],
-      "env": {
-        "MYSQL_HOST": "localhost",
-        "MYSQL_PORT": "3306",
-        "MYSQL_USER": "your_username",
-        "MYSQL_PASSWORD": "your_password",
-        "MYSQL_DATABASE": "your_database",
-        "MYSQL_ALLOW_CREATE": "false",
-        "MYSQL_ALLOW_UPDATE": "false",
-        "MYSQL_ALLOW_DELETE": "false"
-      }
-    }
-  }
-}
-```
-
-### 3. Using with Claude in VS Code
-
-Once configured, you can interact with your MySQL database through Claude:
-
-```
-@claude Can you show me all tables in the database?
-@claude Describe the structure of the users table
-@claude Select the first 10 rows from the products table
-@claude Show me users where age > 25 ordered by name
-```
-
 ## Available Tools
+
+The MySQL MCP Server provides several powerful tools for database interaction. Each tool is designed with security in mind and includes proper input validation:
 
 ### `mysql_list_tables`
 
-Lists all accessible tables in the database.
+**Purpose**: Lists all accessible tables in the database
+
+- Returns a comprehensive list of all tables you have access to
+- Useful for discovering the database structure
+- No parameters required
+- Respects table access controls if configured
 
 ### `mysql_describe_table`
 
-Get detailed information about a table structure including columns, types, and constraints.
+**Purpose**: Get detailed information about a table structure including columns, types, and constraints
 
-**Parameters:**
-
-- `table_name` (string): Name of the table to describe
+- Shows column names, data types, nullable status, and key information
+- Essential for understanding table schema before querying
+- Helps identify primary keys, foreign keys, and data constraints
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to describe
 
 ### `mysql_select_data`
 
-Select data from a table with optional filtering and pagination.
+**Purpose**: Select data from a table with optional filtering and pagination
 
-**Parameters:**
-
-- `table_name` (string): Name of the table to query
-- `columns` (array, optional): Specific columns to select
-- `where` (string, optional): WHERE clause conditions
-- `order_by` (string, optional): ORDER BY clause
-- `limit` (number, optional): Maximum number of rows to return
-- `offset` (number, optional): Number of rows to skip
+- Flexible querying with support for filtering, sorting, and pagination
+- Returns data in a tabular format for easy visualization
+- Supports complex WHERE clauses for precise data retrieval
+- Built-in row limiting for performance and security
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to query
+  - `columns` (array, optional): Specific columns to select (e.g., ["name", "email"])
+  - `where` (string, optional): WHERE clause conditions (e.g., "age > 25 AND status = 'active'")
+  - `order_by` (string, optional): ORDER BY clause (e.g., "name ASC" or "created_at DESC")
+  - `limit` (number, optional): Maximum number of rows to return
+  - `offset` (number, optional): Number of rows to skip for pagination
 
 ### `mysql_insert_data` (if enabled)
 
-Insert new data into a table.
+**Purpose**: Insert new data into a table
 
-**Parameters:**
-
-- `table_name` (string): Name of the table to insert into
-- `data` (object): Data to insert as key-value pairs
+- Allows adding new records to the database
+- Only available when CREATE operations are enabled in configuration
+- Validates data against table schema before insertion
+- Supports batch inserts for efficiency
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to insert into
+  - `data` (object, required): Data to insert as key-value pairs (e.g., {"name": "John", "age": 30})
 
 ### `mysql_update_data` (if enabled)
 
-Update existing data in a table.
+**Purpose**: Update existing data in a table
 
-**Parameters:**
-
-- `table_name` (string): Name of the table to update
-- `data` (object): Data to update as key-value pairs
-- `where` (string): WHERE clause to identify rows to update
-- `where_params` (array, optional): Parameters for the WHERE clause
+- Modifies existing records based on specified criteria
+- Only available when UPDATE operations are enabled in configuration
+- Requires WHERE clause to prevent accidental mass updates
+- Validates updated data against table constraints
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to update
+  - `data` (object, required): Data to update as key-value pairs (e.g., {"status": "inactive"})
+  - `where` (string, required): WHERE clause to identify rows to update (e.g., "id = 123")
+  - `where_params` (array, optional): Parameters for parameterized WHERE clauses
 
 ### `mysql_delete_data` (if enabled)
 
-Delete data from a table.
+**Purpose**: Delete data from a table
 
-**Parameters:**
+- Removes records from the database based on specified criteria
+- Only available when DELETE operations are enabled in configuration
+- Requires WHERE clause to prevent accidental mass deletions
+- Includes safety checks and confirmation prompts
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to delete from
+  - `where` (string, required): WHERE clause to identify rows to delete (e.g., "status = 'expired'")
+  - `where_params` (array, optional): Parameters for parameterized WHERE clauses
 
-- `table_name` (string): Name of the table to delete from
-- `where` (string): WHERE clause to identify rows to delete
-- `where_params` (array, optional): Parameters for the WHERE clause
+**Note**: Write operations (INSERT, UPDATE, DELETE) are disabled by default for security. Enable them only when necessary and ensure proper access controls are in place.
 
 ## Configuration Options
 
@@ -255,36 +314,6 @@ The server includes comprehensive error handling:
 - Runtime exceptions
 
 All errors are logged with context and returned as structured responses.
-
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-### Development Mode
-
-```bash
-npm run dev
-```
-
-### Testing
-
-```bash
-npm test
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
-## License
-
-MIT
 
 ## Contributing
 
