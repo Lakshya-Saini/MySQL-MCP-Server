@@ -18,6 +18,10 @@ This is a **secure MySQL Model Context Protocol (MCP) server** designed for inte
 ### Testing
 - `npm test` - Run Jest tests (framework configured but no tests currently exist)
 
+### Environment Setup
+- Copy `.env.example` to `.env` and configure database credentials
+- See `.env.example` for all available configuration options
+
 ## Architecture
 
 ### Core Components
@@ -42,6 +46,12 @@ The server implements a **security-first design** with multiple layers:
 
 Uses hierarchical configuration: Default values → Environment variables → Constructor parameters
 All configuration is validated through Joi schemas with strict typing.
+
+**Environment Variables Pattern:**
+- Database: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`
+- Features: `MYSQL_ALLOW_CREATE`, `MYSQL_ALLOW_UPDATE`, `MYSQL_ALLOW_DELETE`
+- Security: `MYSQL_ALLOWED_TABLES`, `MYSQL_BLOCKED_TABLES`, `MYSQL_MAX_ROWS`, `MYSQL_READ_ONLY`
+- Logging: `LOG_LEVEL`, `LOG_FILE`
 
 ### MCP Tools Exposed
 
@@ -84,3 +94,13 @@ Comprehensive error catching at every layer with structured error responses and 
 
 ### Modular Design
 Clear separation of concerns with dedicated modules for configuration, database operations, logging, and business logic.
+
+### Testing
+Jest is configured as the testing framework. Tests should be placed in `__tests__` directories or use `.test.ts` extension.
+
+### Important Files
+- `src/index.ts` - Main server entry point and MCP tool definitions
+- `src/utils/database.ts` - MySQL connection pooling and query execution  
+- `src/handlers/queryHandler.ts` - Business logic and validation layer
+- `src/utils/config.ts` - Configuration validation and environment variable handling
+- `src/types/index.ts` - TypeScript type definitions
