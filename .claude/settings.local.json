@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(find:*)",
+      "Bash(npx @lakshya-mcp/mysql-mcp-server-claude:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)"
+    ],
+    "deny": []
+  }
+}
