@@ -7,8 +7,9 @@ A secure, feature-rich MySQL Model Context Protocol (MCP) server designed for in
 - [Features](#features)
 - [Usage](#usage)
   - [With Visual Studio Code](#with-visual-studio-code)
-- [Running from Local Repository](#running-from-local-repository)
-- [Use in your project](#use-in-your-project)
+  - [With Claude Desktop](#with-claude-desktop)
+  - [With Claude Code](#with-claude-code)
+  - [Use in your project](#use-in-your-project)
 - [Available Tools](#available-tools)
 - [Configuration Options](#configuration-options)
   - [Database Configuration](#database-configuration)
@@ -56,71 +57,55 @@ Add this to your `.vscode/mcp.json`:
 }
 ```
 
-### Running from Local Repository
+### With Claude Desktop
 
-1. Clone repository
-
-```bash
-git clone git@github.com:Lakshya-Saini/mysql-mcp-server.git
-cd mysql-mcp-server
-```
-
-2. Install dependencies
-
-```bash
-npm install
-```
-
-3. Copy `.env.example` to `.env`:
-
-```bash
-mv .env.example .env
-```
-
-4. Build project
-
-```bash
-npm run build
-```
-
-5. Configure Claude Desktop
+Add this to your `claude_desktop_config.json`.
+Follow these [instructions](https://modelcontextprotocol.io/quickstart/user#installing-the-filesystem-server) to locate file.
 
 ```json
 {
   "mcpServers": {
-    "mcp_server_mysql": {
-      "command": "/path/to/node",
-      "args": ["/full/path/to/mcp-server-mysql/dist/index.js"],
+    "mysql": {
+      "command": "npx",
+      "args": ["@lakshya-mcp/mysql-mcp-server-claude"],
       "env": {
-        "MYSQL_HOST": "127.0.0.1",
-        "MYSQL_PORT": "3306",
-        "MYSQL_USER": "root",
-        "MYSQL_PASS": "your_password",
-        "MYSQL_DB": "your_database",
-        "ALLOW_INSERT_OPERATION": "false",
-        "ALLOW_UPDATE_OPERATION": "false",
-        "ALLOW_DELETE_OPERATION": "false",
-        "PATH": "/Users/atlasborla/Library/Application Support/Herd/config/nvm/versions/node/v22.9.0/bin:/usr/bin:/bin", // <--- Important to add the following, run in your terminal `echo "$(which node)/../"` to get the path
-        "NODE_PATH": "/Users/atlasborla/Library/Application Support/Herd/config/nvm/versions/node/v22.9.0/lib/node_modules" // <--- Important to add the following, run in your terminal `echo "$(which node)/../../lib/node_modules"`
+        "MYSQL_HOST": "{your_host}",
+        "MYSQL_PORT": "{your_port}",
+        "MYSQL_USER": "{your_username}",
+        "MYSQL_PASSWORD": "{your_password}",
+        "MYSQL_DATABASE": "{your_database}",
+        "MYSQL_ALLOW_CREATE": "false",
+        "MYSQL_ALLOW_UPDATE": "false",
+        "MYSQL_ALLOW_DELETE": "false"
       }
     }
   }
 }
 ```
 
-Replace:
+Save file and restart claude desktop. It should be visible under tools (check icon next to `+`).
 
-- /path/to/node with the full path to your Node.js binary (find it with which node)
-- /full/path/to/mcp-server-mysql with the full path to where you cloned the repository
-- Set the MySQL credentials to match your environment
+### With Claude Code
 
-6. Test server
+Open terminal and run this command:
+
+For windows (without wsl):
 
 ```bash
-node dist/index.js
+claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -- cmd /c npx @lakshya-mcp/mysql-mcp-server-claude
 ```
 
-If it connects to MySQL successfully, you're ready to use it with Claude Desktop.
+For mac / windows (with wsl):
+
+```bash
+claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -- npx -y @lakshya-mcp/mysql-mcp-server-claude
+```
+
+Then type: `claude` and run `/mcp`. It should show:
+
+```
+ ❯ 1. mysql  ✔ connected · Enter to view details
+```
 
 ### Use in your project
 
