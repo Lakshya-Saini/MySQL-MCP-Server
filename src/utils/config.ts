@@ -10,7 +10,7 @@ const configSchema = Joi.object({
     database: Joi.string().required(),
     ssl: Joi.boolean().default(false),
     connectionLimit: Joi.number().min(1).max(100).default(10),
-    timeout: Joi.number().min(1000).default(60000)
+    acquireTimeout: Joi.number().min(1000).default(60000)
   }).required(),
   
   features: Joi.object({
@@ -56,7 +56,7 @@ export function getDefaultConfig(): ServerConfig {
       database: process.env.MYSQL_DATABASE || 'test',
       ssl: process.env.MYSQL_SSL === 'true',
       connectionLimit: parseInt(process.env.MYSQL_CONNECTION_LIMIT || '10'),
-      timeout: parseInt(process.env.MYSQL_TIMEOUT || '60000')
+      acquireTimeout: parseInt(process.env.MYSQL_ACQUIRE_TIMEOUT || process.env.MYSQL_TIMEOUT || '60000')
     },
     features: {
       fetch: true,

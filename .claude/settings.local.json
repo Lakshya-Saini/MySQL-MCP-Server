@@ -8,7 +8,8 @@
       "Bash(find:*)",
       "Bash(npx @lakshya-mcp/mysql-mcp-server-claude:*)",
       "Bash(claude mcp add:*)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": []
   }

@@ -6,7 +6,7 @@ export interface DatabaseConfig {
   database: string;
   ssl?: boolean;
   connectionLimit?: number;
-  timeout?: number;
+  acquireTimeout?: number;
 }
 
 export interface ServerConfig {

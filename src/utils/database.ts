@@ -15,7 +15,7 @@ export class DatabaseManager {
       password: config.password,
       database: config.database,
       connectionLimit: config.connectionLimit || 10,
-      acquireTimeout: config.timeout || 60000,
+      acquireTimeout: config.acquireTimeout || 60000,
       multipleStatements: false,
       namedPlaceholders: true
     };
