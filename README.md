@@ -9,7 +9,8 @@ A secure, feature-rich MySQL Model Context Protocol (MCP) server designed for in
   - [With Visual Studio Code](#with-visual-studio-code)
   - [With Claude Desktop](#with-claude-desktop)
   - [With Claude Code](#with-claude-code)
-  - [Use in your project](#use-in-your-project)
+  - [With Gemini CLI](#with-gemini-cli)
+  - [Within your project](#within-your-project)
 - [Available Tools](#available-tools)
 - [Configuration Options](#configuration-options)
   - [Database Configuration](#database-configuration)
@@ -107,7 +108,37 @@ Then type: `claude` and run `/mcp`. It should show:
  ❯ 1. mysql  ✔ connected · Enter to view details
 ```
 
-### Use in your project
+### With Gemini CLI
+
+Navigate to your home directory and look for a folder named `.gemini`.
+Inside that folder, you will find the `settings.json` file.
+Add this in your `.gemini/settings.json` file:
+
+```json
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": ["@lakshya-mcp/mysql-mcp-server-claude"],
+      "env": {
+        "MYSQL_HOST": "{your_host}",
+        "MYSQL_PORT": "{your_port}",
+        "MYSQL_USER": "{your_username}",
+        "MYSQL_PASSWORD": "{your_password}",
+        "MYSQL_DATABASE": "{your_database}",
+        "MYSQL_ALLOW_CREATE": "false",
+        "MYSQL_ALLOW_UPDATE": "false",
+        "MYSQL_ALLOW_DELETE": "false"
+      }
+    }
+  }
+}
+```
+
+Then restart gemini cli. You should be able to see mysql mcp server.
+You can verify by running `/mcp`.
+
+### Within your project
 
 1. Install package
 
