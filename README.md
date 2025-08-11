@@ -25,7 +25,7 @@ A secure, feature-rich MySQL Model Context Protocol (MCP) server designed for in
 ## Features
 
 - **Security First**: Built with security best practices, input validation, and configurable access controls
-- **Configurable Operations**: Enable/disable CRUD operations based on your needs (fetch enabled by default)
+- **Configurable Operations**: Enable/disable CRUD operations and table creation based on your needs (read operations enabled by default)
 - **Tabular Data Display**: Properly formatted responses for easy data visualization
 - **Comprehensive Logging**: Detailed logging for debugging and monitoring
 - **Environment-Based Configuration**: Easy setup using environment variables or configuration objects
@@ -51,7 +51,9 @@ Add this to your `.vscode/mcp.json`:
         "MYSQL_DATABASE": "{your_database}",
         "MYSQL_ALLOW_CREATE": "false",
         "MYSQL_ALLOW_UPDATE": "false",
-        "MYSQL_ALLOW_DELETE": "false"
+        "MYSQL_ALLOW_DELETE": "false",
+        "MYSQL_ALLOW_CREATE_TABLE": "false",
+        "MYSQL_READ_ONLY": "true" // Set to "true" for read-only mode; "false" allows writes.
       }
     }
   }
@@ -77,7 +79,9 @@ Follow these [instructions](https://modelcontextprotocol.io/quickstart/user#inst
         "MYSQL_DATABASE": "{your_database}",
         "MYSQL_ALLOW_CREATE": "false",
         "MYSQL_ALLOW_UPDATE": "false",
-        "MYSQL_ALLOW_DELETE": "false"
+        "MYSQL_ALLOW_DELETE": "false",
+        "MYSQL_ALLOW_CREATE_TABLE": "false",
+        "MYSQL_READ_ONLY": "true" // Set to "true" for read-only mode; "false" allows writes.
       }
     }
   }
@@ -93,13 +97,13 @@ Open terminal and run this command:
 For windows (without wsl):
 
 ```bash
-claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -- cmd /c npx @lakshya-mcp/mysql-mcp-server-claude
+claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -e MYSQL_ALLOW_CREATE_TABLE=false -e MYSQL_READ_ONLY=true -- cmd /c npx @lakshya-mcp/mysql-mcp-server-claude
 ```
 
 For mac / windows (with wsl):
 
 ```bash
-claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -- npx -y @lakshya-mcp/mysql-mcp-server-claude
+claude mcp add mysql -e MYSQL_HOST=localhost -e MYSQL_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASSWORD={your_password} -e MYSQL_DATABASE={your_database} -e MYSQL_ALLOW_CREATE=false -e MYSQL_ALLOW_UPDATE=false -e MYSQL_ALLOW_DELETE=false -e MYSQL_ALLOW_CREATE_TABLE=false -e MYSQL_READ_ONLY=true -- npx -y @lakshya-mcp/mysql-mcp-server-claude
 ```
 
 Then type: `claude` and run `/mcp`. It should show:
@@ -128,7 +132,9 @@ Add this in your `.gemini/settings.json` file:
         "MYSQL_DATABASE": "{your_database}",
         "MYSQL_ALLOW_CREATE": "false",
         "MYSQL_ALLOW_UPDATE": "false",
-        "MYSQL_ALLOW_DELETE": "false"
+        "MYSQL_ALLOW_DELETE": "false",
+        "MYSQL_ALLOW_CREATE_TABLE": "false",
+        "MYSQL_READ_ONLY": "true" // Set to "true" for read-only mode; "false" allows writes.
       }
     }
   }
@@ -169,6 +175,7 @@ const server = new MySQLMCPServer({
     create: false,
     update: false,
     delete: false,
+    createTable: false,
   },
 });
 ```
@@ -251,7 +258,31 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
   - `where` (string, required): WHERE clause to identify rows to delete (e.g., "status = 'expired'")
   - `where_params` (array, optional): Parameters for parameterized WHERE clauses
 
-**Note**: Write operations (INSERT, UPDATE, DELETE) are disabled by default for security. Enable them only when necessary and ensure proper access controls are in place.
+### mysql_create_table (if enabled)
+
+**Purpose**: Create new tables with specified columns and constraints
+
+- Allows creating new database tables with custom schema definitions
+- Only available when CREATE TABLE operations are enabled in configuration
+- Supports various column types, constraints, and table options
+- Includes safety features like IF NOT EXISTS option
+- **Parameters:**
+  - `table_name` (string, required): Name of the table to create
+  - `columns` (array, required): Array of column definitions with the following properties:
+    - `name` (string, required): Column name
+    - `type` (string, required): Column data type (e.g., "VARCHAR", "INT", "TEXT", "DATETIME")
+    - `length` (number, optional): Column length for types that support it (e.g., VARCHAR(255))
+    - `nullable` (boolean, optional): Whether the column can be NULL (default: true)
+    - `primaryKey` (boolean, optional): Whether this column is part of the primary key (default: false)
+    - `autoIncrement` (boolean, optional): Whether this column auto-increments (default: false)
+    - `unique` (boolean, optional): Whether this column has a unique constraint (default: false)
+    - `defaultValue` (any, optional): Default value for the column
+  - `if_not_exists` (boolean, optional): Use CREATE TABLE IF NOT EXISTS to avoid errors if table exists (default: false)
+  - `engine` (string, optional): Storage engine (e.g., "InnoDB", "MyISAM")
+  - `charset` (string, optional): Character set (e.g., "utf8mb4")
+  - `collation` (string, optional): Collation (e.g., "utf8mb4_unicode_ci")
+
+**Note**: Write operations (INSERT, UPDATE, DELETE, CREATE TABLE) are disabled by default for security. Enable them only when necessary and ensure proper access controls are in place.
 
 ## Configuration Options
 
@@ -267,7 +298,7 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
     database: "dbname",      // Database name
     ssl: false,              // Enable SSL
     connectionLimit: 10,     // Connection pool limit
-    timeout: 60000          // Connection timeout in ms
+    acquireTimeout: 60000   // Connection acquire timeout in ms
   }
 }
 ```
@@ -277,10 +308,11 @@ The MySQL MCP Server provides several powerful tools for database interaction. E
 ```javascript
 {
   features: {
-    fetch: true,    // Always enabled - read operations
-    create: false,  // Enable INSERT operations
-    update: false,  // Enable UPDATE operations
-    delete: false   // Enable DELETE operations
+    fetch: true,        // Always enabled - read operations
+    create: false,      // Enable INSERT operations
+    update: false,      // Enable UPDATE operations
+    delete: false,      // Enable DELETE operations
+    createTable: false  // Enable CREATE TABLE operations
   }
 }
 ```

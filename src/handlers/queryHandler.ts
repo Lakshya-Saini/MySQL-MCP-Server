@@ -1,5 +1,5 @@
 import { DatabaseManager } from '../utils/database';
-import { ServerConfig, McpResponse, QueryResult } from '../types';
+import { ServerConfig, McpResponse, QueryResult, CreateTableOptions } from '../types';
 import { Logger } from '../utils/logger';
 
 export class QueryHandler {
@@ -265,6 +265,56 @@ export class QueryHandler {
       };
     } catch (error) {
       Logger.logError(error as Error, `deleteData: ${tableName}`);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  }
+
+  async createTable(options: CreateTableOptions): Promise<McpResponse> {
+    try {
+      if (!this.config.features.createTable) {
+        return {
+          success: false,
+          error: 'Create table operations are disabled'
+        };
+      }
+
+      if (this.config.security.readOnly) {
+        Logger.logSecurity('Write operation attempted in read-only mode', { tableName: options.tableName, operation: 'createTable' });
+        return {
+          success: false,
+          error: 'Server is in read-only mode'
+        };
+      }
+
+      if (!options.tableName || !options.columns || options.columns.length === 0) {
+        return {
+          success: false,
+          error: 'Table name and columns are required'
+        };
+      }
+
+      const result = await this.db.createTable(options);
+      
+      Logger.getInstance().info(`Created table: ${options.tableName}`, {
+        columnCount: options.columns.length,
+        executionTime: result.executionTime
+      });
+
+      return {
+        success: true,
+        data: { 
+          tableName: options.tableName, 
+          columnCount: options.columns.length 
+        },
+        metadata: {
+          executionTime: result.executionTime
+        }
+      };
+    } catch (error) {
+      Logger.logError(error as Error, `createTable: ${options.tableName}`);
       return {
         success: false,
         error: (error as Error).message

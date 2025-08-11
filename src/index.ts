@@ -189,6 +189,80 @@ class MySQLMCPServer {
         });
       }
 
+      if (this.config.features.createTable) {
+        tools.push({
+          name: 'mysql_create_table',
+          description: 'Create a new table with specified columns and constraints',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              table_name: {
+                type: 'string',
+                description: 'Name of the table to create',
+              },
+              columns: {
+                type: 'array',
+                description: 'Array of column definitions',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                      description: 'Column name',
+                    },
+                    type: {
+                      type: 'string',
+                      description: 'Column data type (e.g., VARCHAR, INT, TEXT, etc.)',
+                    },
+                    length: {
+                      type: 'number',
+                      description: 'Column length for types that support it (optional)',
+                    },
+                    nullable: {
+                      type: 'boolean',
+                      description: 'Whether the column can be NULL (default: true)',
+                    },
+                    primaryKey: {
+                      type: 'boolean',
+                      description: 'Whether this column is part of the primary key (default: false)',
+                    },
+                    autoIncrement: {
+                      type: 'boolean',
+                      description: 'Whether this column auto-increments (default: false)',
+                    },
+                    unique: {
+                      type: 'boolean',
+                      description: 'Whether this column has a unique constraint (default: false)',
+                    },
+                    defaultValue: {
+                      description: 'Default value for the column (optional)',
+                    },
+                  },
+                  required: ['name', 'type'],
+                },
+              },
+              if_not_exists: {
+                type: 'boolean',
+                description: 'Use CREATE TABLE IF NOT EXISTS (default: false)',
+              },
+              engine: {
+                type: 'string',
+                description: 'Storage engine (e.g., InnoDB, MyISAM) (optional)',
+              },
+              charset: {
+                type: 'string',
+                description: 'Character set (e.g., utf8mb4) (optional)',
+              },
+              collation: {
+                type: 'string',
+                description: 'Collation (e.g., utf8mb4_unicode_ci) (optional)',
+              },
+            },
+            required: ['table_name', 'columns'],
+          },
+        });
+      }
+
       return { tools };
     });
 
@@ -311,6 +385,34 @@ class MySQLMCPServer {
                   type: 'text',
                   text: result.success 
                     ? `Data deleted successfully. Affected rows: ${result.metadata?.affectedRows}`
+                    : `Error: ${result.error}`,
+                },
+              ],
+            };
+          }
+
+          case 'mysql_create_table': {
+            if (!this.config.features.createTable) {
+              return {
+                content: [{ type: 'text', text: 'Error: Create table operations are disabled' }],
+              };
+            }
+            const argsObj = args as any;
+            const options = {
+              tableName: argsObj?.table_name,
+              columns: argsObj?.columns || [],
+              ifNotExists: argsObj?.if_not_exists || false,
+              engine: argsObj?.engine,
+              charset: argsObj?.charset,
+              collation: argsObj?.collation,
+            };
+            const result = await this.queryHandler.createTable(options);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: result.success 
+                    ? `Table '${options.tableName}' created successfully with ${options.columns.length} columns.`
                     : `Error: ${result.error}`,
                 },
               ],

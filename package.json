@@ -1,6 +1,6 @@
 {
   "name": "@lakshya-mcp/mysql-mcp-server-claude",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "A secure MySQL MCP server with configurable CRUD operations and comprehensive logging",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

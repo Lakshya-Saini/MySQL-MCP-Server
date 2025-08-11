@@ -17,8 +17,9 @@ const configSchema = Joi.object({
     fetch: Joi.boolean().default(true),
     create: Joi.boolean().default(false),
     update: Joi.boolean().default(false),
-    delete: Joi.boolean().default(false)
-  }).default({ fetch: true, create: false, update: false, delete: false }),
+    delete: Joi.boolean().default(false),
+    createTable: Joi.boolean().default(false)
+  }).default({ fetch: true, create: false, update: false, delete: false, createTable: false }),
   
   security: Joi.object({
     allowedTables: Joi.array().items(Joi.string()).optional(),
@@ -62,7 +63,8 @@ export function getDefaultConfig(): ServerConfig {
       fetch: true,
       create: process.env.MYSQL_ALLOW_CREATE === 'true',
       update: process.env.MYSQL_ALLOW_UPDATE === 'true',
-      delete: process.env.MYSQL_ALLOW_DELETE === 'true'
+      delete: process.env.MYSQL_ALLOW_DELETE === 'true',
+      createTable: process.env.MYSQL_ALLOW_CREATE_TABLE === 'true'
     },
     security: {
       allowedTables: process.env.MYSQL_ALLOWED_TABLES?.split(','),

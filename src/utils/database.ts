@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { DatabaseConfig, QueryResult, TableInfo, ColumnInfo } from '../types';
+import { DatabaseConfig, QueryResult, TableInfo, ColumnInfo, CreateTableOptions, TableColumn } from '../types';
 import { Logger } from './logger';
 
 export class DatabaseManager {
@@ -181,6 +181,74 @@ export class DatabaseManager {
     const query = `DELETE FROM \`${tableName}\` WHERE ${where}`;
     
     return this.executeQuery(query, whereParams);
+  }
+
+  async createTable(options: CreateTableOptions): Promise<QueryResult> {
+    this.validateTableName(options.tableName);
+    
+    let query = `CREATE TABLE `;
+    
+    if (options.ifNotExists) {
+      query += `IF NOT EXISTS `;
+    }
+    
+    query += `\`${options.tableName}\` (`;
+    
+    const columnDefinitions = options.columns.map(column => this.buildColumnDefinition(column));
+    query += columnDefinitions.join(', ');
+    
+    const primaryKeys = options.columns.filter(col => col.primaryKey).map(col => col.name);
+    if (primaryKeys.length > 0) {
+      query += `, PRIMARY KEY (\`${primaryKeys.join('`, `')}\`)`;
+    }
+    
+    query += ')';
+    
+    if (options.engine) {
+      query += ` ENGINE=${options.engine}`;
+    }
+    
+    if (options.charset) {
+      query += ` DEFAULT CHARSET=${options.charset}`;
+    }
+    
+    if (options.collation) {
+      query += ` COLLATE=${options.collation}`;
+    }
+    
+    return this.executeQuery(query);
+  }
+
+  private buildColumnDefinition(column: TableColumn): string {
+    let definition = `\`${column.name}\` ${column.type}`;
+    
+    if (column.length) {
+      definition += `(${column.length})`;
+    }
+    
+    if (!column.nullable) {
+      definition += ' NOT NULL';
+    }
+    
+    if (column.autoIncrement) {
+      definition += ' AUTO_INCREMENT';
+    }
+    
+    if (column.unique) {
+      definition += ' UNIQUE';
+    }
+    
+    if (column.defaultValue !== undefined) {
+      if (typeof column.defaultValue === 'string') {
+        definition += ` DEFAULT '${column.defaultValue}'`;
+      } else if (column.defaultValue === null) {
+        definition += ' DEFAULT NULL';
+      } else {
+        definition += ` DEFAULT ${column.defaultValue}`;
+      }
+    }
+    
+    return definition;
   }
 
   private validateTableName(tableName: string): void {

@@ -16,6 +16,7 @@ export interface ServerConfig {
     create: boolean;
     update: boolean;
     delete: boolean;
+    createTable: boolean;
   };
   security: {
     allowedTables?: string[];
@@ -48,6 +49,26 @@ export interface ColumnInfo {
   nullable: boolean;
   key: string;
   default: any;
+}
+
+export interface TableColumn {
+  name: string;
+  type: string;
+  nullable?: boolean;
+  primaryKey?: boolean;
+  autoIncrement?: boolean;
+  unique?: boolean;
+  defaultValue?: any;
+  length?: number;
+}
+
+export interface CreateTableOptions {
+  tableName: string;
+  columns: TableColumn[];
+  ifNotExists?: boolean;
+  engine?: string;
+  charset?: string;
+  collation?: string;
 }
 
 export interface McpResponse<T = any> {
